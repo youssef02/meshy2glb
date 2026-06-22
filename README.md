@@ -1,4 +1,6 @@
-# Meshy GLB Decryptor - made with ❤️ from Morocco by Youssef Arrassen
+# Meshy GLB Decryptor
+
+made with ❤️ from Morocco by Youssef Arrassen
 
 A Tampermonkey userscript that intercepts and downloads GLB model files from [meshy.ai](https://www.meshy.ai).
 
