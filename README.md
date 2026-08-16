@@ -13,6 +13,7 @@ A Tampermonkey userscript that intercepts and downloads GLB model files from [me
 1. Open Tampermonkey → **Create a new script**
 2. Paste the contents of `script.js`
 3. Save (`Ctrl+S`)
+4. Make sure "Allow User Scripts" is turned on for the Tampermonkey extension (in extension settings of browser).
 
 ## Usage
 
