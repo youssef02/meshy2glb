@@ -72,7 +72,7 @@
             const entry = { blob, src, time: Date.now(), filename: getModelFilename() };
             window.__meshyGLBs.push(entry);
             window.__meshyLastGLB = entry;
-            dbg('CAPTURE', 'GLB captured! size=' + blob.size + ' src=' + src);
+            dbg('CAPTURE', 'GLB captured! filename=' + entry.filename + ' size=' + blob.size + ' src=' + src);
             updateButton();
             if (AUTO_DOWNLOAD) {
                 const url = _origCreateObjectURL(blob);
@@ -189,8 +189,14 @@
             const btn = document.getElementById('meshy-decrypt-btn');
             if (!btn) return;
             const n = window.__meshyGLBs.length;
-            btn.textContent = n > 0 ? '💾 GLB (' + n + ' captured)' : '💾 Download GLB';
+            btn.textContent = n === 0
+                ? '💾 Waiting for GLB…'
+                : n === 1
+                    ? '💾 Download captured GLB'
+                    : '💾 Download ' + n + ' captured GLBs';
+            btn.disabled = n === 0;
             btn.style.background = n > 0 ? '#00ff00' : '#888';
+            btn.style.cursor = n > 0 ? 'pointer' : 'default';
         }
 
         function addButton() {
@@ -199,7 +205,7 @@
 
             const btn = document.createElement('button');
             btn.id = 'meshy-decrypt-btn';
-            btn.textContent = '💾 Download GLB';
+            btn.textContent = '💾 Waiting for GLB…';
             btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:999999;padding:12px 24px;background:#888;color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:14px;';
             btn.onclick = function() {
                 const glbs = window.__meshyGLBs;
