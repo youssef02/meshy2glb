@@ -24,7 +24,9 @@
         if (window.__meshyDecryptorInjected) return;
         window.__meshyDecryptorInjected = true;
 
-        console.log('%c🔓 Meshy Decryptor v2.1', 'font-size:16px;color:lime;background:black;padding:4px;');
+        const AUTO_DOWNLOAD = true;
+
+        console.log('%c🔓 Meshy Decryptor v2.2', 'font-size:16px;color:lime;background:black;padding:4px;');
 
         window.__meshyGLBs = [];
         window.__meshyLastGLB = null;
@@ -72,15 +74,16 @@
             window.__meshyLastGLB = entry;
             dbg('CAPTURE', 'GLB captured! size=' + blob.size + ' src=' + src);
             updateButton();
-            // Auto-download immediately
-            const url = _origCreateObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = entry.filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setTimeout(() => URL.revokeObjectURL(url), 10000);
+            if (AUTO_DOWNLOAD) {
+                const url = _origCreateObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = entry.filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 10000);
+            }
         }
 
         // ─── HOOK: Worker ─────────────────────────────────────────────────────

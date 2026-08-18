@@ -22,6 +22,8 @@ A Tampermonkey userscript that intercepts and downloads GLB model files from [me
 4. The GLB file downloads automatically — no extra steps needed
 5. The green **💾 GLB (N captured)** button in the bottom-right corner lets you re-download any captured files
 
+To disable automatic downloads, set `AUTO_DOWNLOAD` to `false` near the top of `pageScript()`. Captured files remain available through the download button.
+
 ## How it works
 
 Meshy serves 3D models as encrypted binary files (`MESHY.AI` header). Decryption happens inside a Web Worker using a WASM module. The script injects into the page context (bypassing Tampermonkey's sandbox) and hooks:
