@@ -11,8 +11,9 @@ A Tampermonkey userscript that intercepts and downloads GLB model files from [me
 ## Installation
 
 1. Open Tampermonkey → **Create a new script**
-2. Paste the contents of `meshy-decrypt.user.js`
-3. Save (`Ctrl+S`)
+2. Open [`script.js`](script.js) from this repository and copy its contents
+3. Paste the contents into Tampermonkey
+4. Save (`Ctrl+S`)
 
 ## Usage
 
@@ -20,7 +21,9 @@ A Tampermonkey userscript that intercepts and downloads GLB model files from [me
 2. Open a model
 3. Click the site's **Export / Download** button to trigger the model load
 4. The GLB file downloads automatically — no extra steps needed
-5. The green **💾 GLB (N captured)** button in the bottom-right corner lets you re-download any captured files
+5. The green button in the bottom-right corner lets you re-download the captured GLB files
+
+To disable automatic downloads, set `AUTO_DOWNLOAD` to `false` near the top of `pageScript()`. Captured files remain available through the download button.
 
 ## How it works
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Meshy GLB Decryptor
 // @namespace    http://tampermonkey.net/
-// @version      2.1
+// @version      2.2
 // @description  Intercept and decrypt Meshy GLB files
 // @author       Youssef02
 // @match        https://*.meshy.ai/*
@@ -24,7 +24,12 @@
         if (window.__meshyDecryptorInjected) return;
         window.__meshyDecryptorInjected = true;
 
-        console.log('%c🔓 Meshy Decryptor v2.1', 'font-size:16px;color:lime;background:black;padding:4px;');
+        const AUTO_DOWNLOAD = true;
+
+        console.log(
+            '%c🔓 Meshy Decryptor v2.2 — auto-download ' + (AUTO_DOWNLOAD ? 'enabled' : 'disabled'),
+            'font-size:16px;color:lime;background:black;padding:4px;'
+        );
 
         window.__meshyGLBs = [];
         window.__meshyLastGLB = null;
@@ -54,22 +59,38 @@
             return false;
         }
 
-        // ─── CAPTURE ──────────────────────────────────────────────────────────
-        function captureGLB(blob, src) {
-            const entry = { blob, src, time: Date.now() };
-            window.__meshyGLBs.push(entry);
-            window.__meshyLastGLB = entry;
-            dbg('CAPTURE', 'GLB captured! size=' + blob.size + ' src=' + src);
-            updateButton();
-            // Auto-download immediately
+        // ─── HELPERS ──────────────────────────────────────────────────────────
+        function getModelFilename() {
+            const title = document.querySelector('h1')?.textContent || '';
+            const safeTitle = title
+                .replace(/[<>:"/\\|?*\x00-\x1F-]+/g, '-')
+                .replace(/\s+/g, ' ')
+                .replace(/^[.\s-]+|[.\s-]+$/g, '');
+
+            return safeTitle ? safeTitle + '.glb' : 'meshy_' + Date.now() + '.glb';
+        }
+
+        function downloadGLB(blob, filename, revokeDelay = 10000) {
             const url = _origCreateObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'meshy_' + Date.now() + '.glb';
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            setTimeout(() => URL.revokeObjectURL(url), 10000);
+            setTimeout(() => URL.revokeObjectURL(url), revokeDelay);
+        }
+
+        // ─── CAPTURE ──────────────────────────────────────────────────────────
+        function captureGLB(blob, src) {
+            const entry = { blob, src, time: Date.now(), filename: getModelFilename() };
+            window.__meshyGLBs.push(entry);
+            window.__meshyLastGLB = entry;
+            dbg('CAPTURE', 'GLB captured! filename=' + entry.filename + ' size=' + blob.size + ' src=' + src);
+            updateButton();
+            if (AUTO_DOWNLOAD) {
+                downloadGLB(blob, entry.filename);
+            }
         }
 
         // ─── HOOK: Worker ─────────────────────────────────────────────────────
@@ -175,8 +196,14 @@
             const btn = document.getElementById('meshy-decrypt-btn');
             if (!btn) return;
             const n = window.__meshyGLBs.length;
-            btn.textContent = n > 0 ? '💾 GLB (' + n + ' captured)' : '💾 Download GLB';
+            btn.textContent = n === 0
+                ? '💾 Waiting for GLB…'
+                : n === 1
+                    ? '💾 Download captured GLB'
+                    : '💾 Download ' + n + ' captured GLBs';
+            btn.disabled = n === 0;
             btn.style.background = n > 0 ? '#00ff00' : '#888';
+            btn.style.cursor = n > 0 ? 'pointer' : 'default';
         }
 
         function addButton() {
@@ -185,7 +212,7 @@
 
             const btn = document.createElement('button');
             btn.id = 'meshy-decrypt-btn';
-            btn.textContent = '💾 Download GLB';
+            btn.textContent = '💾 Waiting for GLB…';
             btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:999999;padding:12px 24px;background:#888;color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:14px;';
             btn.onclick = function() {
                 const glbs = window.__meshyGLBs;
@@ -194,14 +221,10 @@
                     return;
                 }
                 glbs.forEach((entry, i) => {
-                    const url = _origCreateObjectURL(entry.blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'meshy_' + (i+1) + '_' + Date.now() + '.glb';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    setTimeout(() => URL.revokeObjectURL(url), 5000);
+                    const filename = glbs.length > 1
+                        ? entry.filename.replace(/\.glb$/i, '_' + (i + 1) + '.glb')
+                        : entry.filename;
+                    downloadGLB(entry.blob, filename, 5000);
                 });
             };
             document.body.appendChild(btn);
