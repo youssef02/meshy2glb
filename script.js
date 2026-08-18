@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Meshy GLB Decryptor
 // @namespace    http://tampermonkey.net/
-// @version      2.1
+// @version      2.2
 // @description  Intercept and decrypt Meshy GLB files
 // @author       Youssef02
 // @match        https://*.meshy.ai/*
@@ -54,9 +54,20 @@
             return false;
         }
 
+        // ─── FILENAME ─────────────────────────────────────────────────────────
+        function getModelFilename() {
+            const title = document.querySelector('h1')?.textContent || '';
+            const safeTitle = title
+                .replace(/[<>:"/\\|?*\x00-\x1F-]+/g, '-')
+                .replace(/\s+/g, ' ')
+                .replace(/^[.\s-]+|[.\s-]+$/g, '');
+
+            return safeTitle ? safeTitle + '.glb' : 'meshy_' + Date.now() + '.glb';
+        }
+
         // ─── CAPTURE ──────────────────────────────────────────────────────────
         function captureGLB(blob, src) {
-            const entry = { blob, src, time: Date.now() };
+            const entry = { blob, src, time: Date.now(), filename: getModelFilename() };
             window.__meshyGLBs.push(entry);
             window.__meshyLastGLB = entry;
             dbg('CAPTURE', 'GLB captured! size=' + blob.size + ' src=' + src);
@@ -65,7 +76,7 @@
             const url = _origCreateObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'meshy_' + Date.now() + '.glb';
+            a.download = entry.filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -197,7 +208,9 @@
                     const url = _origCreateObjectURL(entry.blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'meshy_' + (i+1) + '_' + Date.now() + '.glb';
+                    a.download = glbs.length > 1
+                        ? entry.filename.replace(/\.glb$/i, '_' + (i + 1) + '.glb')
+                        : entry.filename;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
