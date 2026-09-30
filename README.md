@@ -1,7 +1,10 @@
 # Meshy GLB Decryptor
 
 made with ❤️ from Morocco by Youssef Arrassen
-
+>>>
+>>> Thanks for the 80+ Stars, due to not getting hired by meshy.ai, if you want to buy me a coffee or shotw support here is my paypal https://www.paypal.com/qrcodes/p2pqrc/AFD4TSNT95MY2
+>>> I am doing this to fund my future projects, or if you need special help with a complex ai 3d workflow, i have RTX 3090 ready for the job for 5 euros/dollars, any other type of requests you can contact me at arrassen.youssef@gmail.com
+>>>
 A Tampermonkey userscript that intercepts and downloads GLB model files from [meshy.ai](https://www.meshy.ai).
 
 ## Requirements
